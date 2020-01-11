@@ -1,6 +1,6 @@
 # Track
 
-**Get inspired to keep moving forward, by visualizing your and other people progress.**
+**Get inspired to keep moving forward, by visualizing your own progress along with the progress made by people you trust and respect.**
 
 ![mockup image](mockup.jpg)
 
