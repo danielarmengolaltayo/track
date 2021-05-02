@@ -14,7 +14,7 @@ body {
 }
 
 #add {
-    padding: 20px 0 50% 0;
+    padding: 20px 0 50vh 0;
 }
 
 .left,
@@ -33,11 +33,18 @@ body {
 }
 
 #header {
-    color: red;
     padding-top: 30px;
     position: fixed;
     width: 100%;
     z-index: 10;
+}
+
+#header .left {
+    color: black;
+}
+
+#header .right {
+    color: red;
 }
 
 .record {
