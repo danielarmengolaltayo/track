@@ -1,0 +1,83 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.8rem;
+}
+
+#wrapper {
+    /* display: flex; */
+}
+
+#records {
+    padding-top: 70px;
+}
+
+#add {
+    padding: 20px 0 50% 0;
+}
+
+.left,
+.right {
+    width: 50%;
+}
+
+.left {
+    text-align: right;
+}
+
+.record,
+#header,
+#add {
+    display: flex;
+}
+
+#header {
+    color: red;
+    padding-top: 30px;
+    position: fixed;
+    width: 100%;
+    z-index: 10;
+}
+
+.record {
+    padding: 0 20px 0 20px;
+    /* https://stackoverflow.com/questions/499137/how-can-i-force-a-long-string-without-any-blank-to-be-wrapped */
+    white-space: -moz-pre-wrap;
+    /* Mozilla */
+    white-space: -hp-pre-wrap;
+    /* HP printers */
+    white-space: -o-pre-wrap;
+    /* Opera 7 */
+    white-space: -pre-wrap;
+    /* Opera 4-6 */
+    white-space: pre-wrap;
+    /* CSS 2.1 */
+    white-space: pre-line;
+    /* CSS 3 (and 2.1 as well, actually) */
+    word-wrap: break-word;
+    /* IE */
+    word-break: break-all;
+}
+
+.record .left {
+    opacity: 0.25;
+}
+
+.date {
+    opacity: 0.25;
+    display: table;
+    width: 100px;
+    /* font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem; */
+    text-align: center;
+}
+
+#gradient {
+    height: 70px;
+    width: 100%;
+    position: fixed;
+    top: 0px;
+    z-index: 5;
+    background: linear-gradient(180deg, white 80%, rgba(255, 255, 255, 0) 100%);
+}
