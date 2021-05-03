@@ -180,7 +180,7 @@ function mergeMultipleEntriesForTheSameDate() {
     // }
     for (var i = 1; i < a.length; i++) {
         if (a[i].when.isSame(a[i - 1].when)) {
-            a[i - 1].what = a[i - 1].what + "<br>" + a[i].what;
+            a[i - 1].what = a[i].what + "<br>" + a[i - 1].what;
             a.splice(i, 1);
             i--;
         }
@@ -190,7 +190,7 @@ function mergeMultipleEntriesForTheSameDate() {
     // }
     for (var i = 1; i < b.length; i++) {
         if (b[i].when.isSame(b[i - 1].when)) {
-            b[i - 1].what = b[i - 1].what + "<br>" + b[i].what;
+            b[i - 1].what = b[i].what + "<br>" + b[i - 1].what;
             b.splice(i, 1);
             i--;
         }
