@@ -4,6 +4,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const userA = urlParams.get('userA');
 const userB = urlParams.get('userB');
 const form = urlParams.get('form');
+const formG = urlParams.get('formG');
 
 /////////////////// config airtable
 
@@ -16,6 +17,8 @@ var airtableBaseKey = "appaGvmsLzxTrLLh7";
 // base
 var airtableBaseNameA = userA;
 var airtableBaseNameB = userB;
+var airtableBaseNameAgoals = userA + " goals";
+var airtableBaseNameBgoals = userB + " goals";
 
 // view
 var airtableViewName = "Grid view";
@@ -23,6 +26,8 @@ var airtableViewName = "Grid view";
 // records
 var a = [];
 var b = [];
+var ag = [];
+var bg = [];
 
 // retrieving data from airtable
 var Airtable = require('airtable');
@@ -30,6 +35,8 @@ var base = new Airtable({ apiKey: key }).base(airtableBaseKey);
 
 var loadA = false;
 var loadB = false;
+var loadAgoals = false;
+var loadBgoals = false;
 
 base(airtableBaseNameA).select({
     view: airtableViewName
@@ -63,10 +70,41 @@ base(airtableBaseNameB).select({
     if (err) { console.error(err); return; }
 });
 
+base(airtableBaseNameAgoals).select({
+    view: airtableViewName
+}).eachPage(function page(records) {
+    records.forEach(function (record) {
+        ag.push({
+            goal: record.get("goal")
+        });
+    });
+    loadAgoals = true;
+    render();
+
+}, function done(err) {
+    if (err) { console.error(err); return; }
+});
+
+base(airtableBaseNameBgoals).select({
+    view: airtableViewName
+}).eachPage(function page(records) {
+    records.forEach(function (record) {
+        bg.push({
+            goal: record.get("goal")
+        });
+    });
+    loadBgoals = true;
+    render();
+
+}, function done(err) {
+    if (err) { console.error(err); return; }
+});
+
 /////////////////// variables
 
 var initDate;
 var t = [];
+var g = [];
 
 /////////////////// logic
 
@@ -106,6 +144,34 @@ function createTimeline() {
     // for (var i = 0; i < t.length; i++) {
     //     console.log("day " + t[i].format());
     // }
+}
+
+function createGoalsList() {
+    if (ag.length > bg.length) {
+        for (var i = 0; i < ag.length; i++) {
+            g.push({
+                a: ag[i].goal
+            });
+        }
+        for (var i = 0; i < bg.length; i++) {
+            g[i].b = bg[i].goal;
+        }
+        for (var i = bg.length; i < ag.length; i++) {
+            g[i].b = "";
+        }
+    } else {
+        for (var i = 0; i < bg.length; i++) {
+            g.push({
+                b: bg[i].goal
+            });
+        }
+        for (var i = 0; i < ag.length; i++) {
+            g[i].a = ag[i].goal;
+        }
+        for (var i = ag.length; i < bg.length; i++) {
+            g[i].a = "";
+        }
+    }
 }
 
 function mergeMultipleEntriesForTheSameDate() {
@@ -162,8 +228,9 @@ function fillTimeline() {
 function fillHTML() {
     var header = document.getElementById("header");
     var records = document.getElementById("records");
+    var goals = document.getElementById("goals");
     //header with usernames
-    header.innerHTML = "<div class='left'>" + userA + "</div><div class='date'></div><div class='right'>" + "Your progress" + "</div>";
+    header.innerHTML = "<div class='record header'><div class='left'>" + userA + "</div><div class='date'></div><div class='right'>" + "Your progress" + "</div></div>";
     for (var i = 0; i < t.length; i++) {
         //check if undefined and substitute it with an empty string
         if (!t[i].a) {
@@ -174,26 +241,31 @@ function fillHTML() {
         }
         records.innerHTML = records.innerHTML + "<div class='record'><div class='left'>" + t[i].a + "</div><div class='date'>" + t[i].d.format('YYYY/MM/DD') + "</div><div class='right'>" + t[i].b + "</div></div>";
     }
+    //footer
+    goals.innerHTML = "<div class='goal header'><div class='left'></div><div class='date'></div><div class='right'>Your goals</div></div>";
+    for (var i = 0; i < g.length; i++) {
+        goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[i].a + "</div><div class='date'></div><div class='right'>" + g[i].b + "</div></div>";
+    }
 }
 
 function addLinkForm() {
     var add = document.getElementById("add");
-    add.innerHTML = "<div class='left'></div><div class='date'></div><div class='right'><a href='https://airtable.com/" + form + "' target='_blank'>What progress have you made today?</a></div>";
+    add.innerHTML = "<div class='record'><div class='left'></div><div class='date'></div><div class='right'><a href='https://airtable.com/" + form + "' target='_blank'>What progress have you made today?</a> <a href='https://airtable.com/" + formG + "' target='_blank'>New goal?</a></div></div>";
 }
 
 function render() {
-    if (loadA == true && loadB == true) {
+    if (loadA == true && loadB == true && loadAgoals == true && loadBgoals == true) {
         sortByDate();
         getInitialDate();
         createTimeline();
+        createGoalsList();
         mergeMultipleEntriesForTheSameDate();
         fillTimeline();
         fillHTML();
         addLinkForm();
-        document.getElementById('add').scrollIntoView();
-        // var content = getListOfRecords();
-        // left.innerHTML = left.innerHTML + content.left;
-        // right.innerHTML = right.innerHTML + content.right;
+        setTimeout(function () {
+            document.getElementById('add').scrollIntoView({ behavior: "smooth" });
+        }, 500);
         console.log("rendered!");
     }
 }
