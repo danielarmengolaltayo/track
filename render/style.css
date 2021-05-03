@@ -91,6 +91,7 @@ body {
     background: linear-gradient(0deg, white 80%, rgba(255, 255, 255, 0) 100%);
 }
 
-a {
+a,
+a:visited {
     color: blue;
 }
