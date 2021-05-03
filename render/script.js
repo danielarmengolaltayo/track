@@ -75,7 +75,7 @@ base(airtableBaseNameAgoals).select({
 }).eachPage(function page(records) {
     records.forEach(function (record) {
         ag.push({
-            goal: record.get("goal")
+            goal: record.get("goals")
         });
     });
     loadAgoals = true;
@@ -90,7 +90,7 @@ base(airtableBaseNameBgoals).select({
 }).eachPage(function page(records) {
     records.forEach(function (record) {
         bg.push({
-            goal: record.get("goal")
+            goal: record.get("goals")
         });
     });
     loadBgoals = true;
@@ -180,7 +180,7 @@ function mergeMultipleEntriesForTheSameDate() {
     // }
     for (var i = 1; i < a.length; i++) {
         if (a[i].when.isSame(a[i - 1].when)) {
-            a[i - 1].what = a[i - 1].what + "\n" + a[i].what;
+            a[i - 1].what = a[i - 1].what + "<br>" + a[i].what;
             a.splice(i, 1);
             i--;
         }
@@ -190,7 +190,7 @@ function mergeMultipleEntriesForTheSameDate() {
     // }
     for (var i = 1; i < b.length; i++) {
         if (b[i].when.isSame(b[i - 1].when)) {
-            b[i - 1].what = b[i - 1].what + "\n" + b[i].what;
+            b[i - 1].what = b[i - 1].what + "<br>" + b[i].what;
             b.splice(i, 1);
             i--;
         }
@@ -229,28 +229,45 @@ function fillHTML() {
     var header = document.getElementById("header");
     var records = document.getElementById("records");
     var goals = document.getElementById("goals");
+    var progress = document.getElementById("progress");
+
+    goals.innerHTML = "<div class='goal header'><div class='left'>" + userA + "'s goals</div><div class='date'></div><div class='right'>Your goals&nbsp;&nbsp;<a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div>";
+    progress.innerHTML = "<div class='record header'><div class='left'>" + userA + "'s progress</div><div class='date'></div><div class='right'>Your progress&nbsp;&nbsp;<sup><a href='https://airtable.com/" + form + "' target='_blank'>Add</a></sup></div></div></div>";
+
     //header with usernames
-    header.innerHTML = "<div class='record header'><div class='left'>" + userA + "</div><div class='date'></div><div class='right'>" + "Your progress" + "</div></div>";
-    for (var i = 0; i < t.length; i++) {
+    // header.innerHTML = header.innerHTML + "<div class='record header'><div class='left'>" + userA + "</div><div class='date'></div><div class='right'>Your progress</div></div><div class='record'><div class='left'></div><div class='date'><a href='https://airtable.com/" + form + "' target='_blank'>add</a></div><div class='right'></div></div></div>";
+    for (var i = t.length - 1; i >= 0; i--) {
+        var d;
+        if (i == t.length - 1) {
+            d = "Today";
+        } else if (i == t.length - 2) {
+            d = "Yesterday";
+        } else {
+            d = t[i].d.format('YYYY/MM/DD');
+        }
         //check if undefined and substitute it with an empty string
-        if (!t[i].a) {
+        if (t[i].a == undefined) {
             t[i].a = "";
         }
-        if (!t[i].b) {
+        if (t[i].b == undefined) {
             t[i].b = "";
+            d = "<div class='date'>" + d + "</div>";
+        } else {
+            d = "<div class='date' style='text-decoration: line-through;'>" + d + "</div>";
         }
-        records.innerHTML = records.innerHTML + "<div class='record'><div class='left'>" + t[i].a + "</div><div class='date'>" + t[i].d.format('YYYY/MM/DD') + "</div><div class='right'>" + t[i].b + "</div></div>";
+        records.innerHTML = records.innerHTML + "<div class='record'><div class='left'>" + t[i].a + "</div>" + d + "<div class='right'>" + t[i].b + "</div></div>";
     }
     //footer
-    goals.innerHTML = "<div class='goal header'><div class='left'></div><div class='date'></div><div class='right'>Your goals</div></div>";
-    for (var i = 0; i < g.length; i++) {
-        goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[i].a + "</div><div class='date'></div><div class='right'>" + g[i].b + "</div></div>";
-    }
+    // header.innerHTML = "<div class='goal header'><div class='left'></div><div class='date'></div><div class='right'>Your goals <a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div>" + header.innerHTML;
+    // for (var i = 0; i < g.length; i++) {
+    //     goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[i].a + "</div><div class='date'></div><div class='right'>" + g[i].b + "</div></div>";
+    // }
+    goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[0].a + "</div><div class='date'></div><div class='right'>" + g[0].b + "</div></div>";
 }
 
 function addLinkForm() {
     var add = document.getElementById("add");
-    add.innerHTML = "<div class='record'><div class='left'></div><div class='date'></div><div class='right'><a href='https://airtable.com/" + form + "' target='_blank'>What progress have you made today?</a> <a href='https://airtable.com/" + formG + "' target='_blank'>New goal?</a></div></div>";
+    add.innerHTML = "<div class='record'><div class='left'></div><div class='date'></div><div class='right'><a href='https://airtable.com/" + form + "' target='_blank'>What progress have you made today?</a></div></div>";
 }
 
 function render() {
@@ -262,15 +279,15 @@ function render() {
         mergeMultipleEntriesForTheSameDate();
         fillTimeline();
         fillHTML();
-        addLinkForm();
-        setTimeout(function () {
-            document.getElementById('add').scrollIntoView({ behavior: "smooth" });
-        }, 500);
+        // addLinkForm();
+        // setTimeout(function () {
+        //     document.getElementById('last').scrollIntoView({ behavior: "smooth" });
+        // }, 500);
         console.log("rendered!");
     }
 }
 
 
 /*
-
+- no tratar goals como lista
 */
