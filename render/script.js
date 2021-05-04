@@ -26,8 +26,7 @@ var airtableViewName = "Grid view";
 // records
 var a = [];
 var b = [];
-var ag = [];
-var bg = [];
+var ag, bg;
 
 // retrieving data from airtable
 var Airtable = require('airtable');
@@ -35,8 +34,8 @@ var base = new Airtable({ apiKey: key }).base(airtableBaseKey);
 
 var loadA = false;
 var loadB = false;
-var loadAgoals = false;
-var loadBgoals = false;
+var loadAG = false;
+var loadBG = false;
 
 base(airtableBaseNameA).select({
     view: airtableViewName
@@ -73,12 +72,10 @@ base(airtableBaseNameB).select({
 base(airtableBaseNameAgoals).select({
     view: airtableViewName
 }).eachPage(function page(records) {
-    records.forEach(function (record) {
-        ag.push({
-            goal: record.get("goals")
-        });
+    records.slice(0, 1).forEach(function (record) {
+        ag = record.get("goals");
     });
-    loadAgoals = true;
+    loadAG = true;
     render();
 
 }, function done(err) {
@@ -88,12 +85,10 @@ base(airtableBaseNameAgoals).select({
 base(airtableBaseNameBgoals).select({
     view: airtableViewName
 }).eachPage(function page(records) {
-    records.forEach(function (record) {
-        bg.push({
-            goal: record.get("goals")
-        });
+    records.slice(0, 1).forEach(function (record) {
+        bg = record.get("goals");
     });
-    loadBgoals = true;
+    loadBG = true;
     render();
 
 }, function done(err) {
@@ -102,82 +97,39 @@ base(airtableBaseNameBgoals).select({
 
 /////////////////// variables
 
-var initDate;
-var t = [];
-var g = [];
+var initialDate;
+var t = []; //timeline
 
 /////////////////// logic
 
-function sortByDate() {
-    // for (var i = 0; i < b.length; i++) {
-    //     console.log("original array: " + b[i].what + " " + b[i].when);
-    // }
+function sortArrayOfObjectsByDate(x, date) {
     // https://stackoverflow.com/questions/10123953/how-to-sort-an-object-array-by-date-property
-    a.sort(function (x, y) {
-        return dayjs(x.when) - dayjs(y.when);
+    x.sort(function (a, b) {
+        return a[date] - b[date];
     });
-    b.sort(function (x, y) {
-        return dayjs(x.when) - dayjs(y.when);
-    });
-    // for (var i = 0; i < b.length; i++) {
-    //     console.log("sorted array: " + b[i].what + " " + b[i].when);
-    // }
 }
 
-function getInitialDate() {
-    if (a[0].when > b[0].when) {
-        initDate = dayjs(b[0].when);
+function getInitialDate(a, b) {
+    if (a > b) {
+        return b;
     } else {
-        initDate = dayjs(a[0].when);
-        //en el cas que siguin les dues dates la mateixa, dona igual quina agafem
+        return a;
     }
 }
 
-function createTimeline() {
-    var days = dayjs().diff(initDate, 'day') + 1;
-    console.log("days: " + days);
+function populateTimelineArrayWithAnObjectForEachDate(startDate) {
+    var x = [];
+    var days = dayjs().diff(startDate, 'day') + 1;
+    // console.log("days: " + days);
     for (var i = 0; i < days; i++) {
-        t.push({
-            d: initDate.add(i, 'day')
+        x.push({
+            d: startDate.add(i, 'day')
         });
     }
-    // for (var i = 0; i < t.length; i++) {
-    //     console.log("day " + t[i].format());
-    // }
-}
-
-function createGoalsList() {
-    if (ag.length > bg.length) {
-        for (var i = 0; i < ag.length; i++) {
-            g.push({
-                a: ag[i].goal
-            });
-        }
-        for (var i = 0; i < bg.length; i++) {
-            g[i].b = bg[i].goal;
-        }
-        for (var i = bg.length; i < ag.length; i++) {
-            g[i].b = "";
-        }
-    } else {
-        for (var i = 0; i < bg.length; i++) {
-            g.push({
-                b: bg[i].goal
-            });
-        }
-        for (var i = 0; i < ag.length; i++) {
-            g[i].a = ag[i].goal;
-        }
-        for (var i = ag.length; i < bg.length; i++) {
-            g[i].a = "";
-        }
-    }
+    return x;
 }
 
 function mergeMultipleEntriesForTheSameDate() {
-    // for (var i = 0; i < a.length; i++) {
-    //     console.log("array pre " + a[i].what + " " + a[i].when);
-    // }
     for (var i = 1; i < a.length; i++) {
         if (a[i].when.isSame(a[i - 1].when)) {
             a[i - 1].what = a[i].what + "<br>" + a[i - 1].what;
@@ -185,9 +137,6 @@ function mergeMultipleEntriesForTheSameDate() {
             i--;
         }
     }
-    // for (var i = 0; i < a.length; i++) {
-    //     console.log("array post " + a[i].what + " " + a[i].when);
-    // }
     for (var i = 1; i < b.length; i++) {
         if (b[i].when.isSame(b[i - 1].when)) {
             b[i - 1].what = b[i].what + "<br>" + b[i - 1].what;
@@ -197,15 +146,9 @@ function mergeMultipleEntriesForTheSameDate() {
     }
 }
 
-function fillTimeline() {
+function fillTimelineWithProgress() {
     var ia = 0;
     var ib = 0;
-    // for (var i = 0; i < a.length; i++) {
-    //     console.log("a: " + a[i].what + " - " + a[i].when.format('YYYY/MM/DD'));
-    // }
-    // for (var i = 0; i < b.length; i++) {
-    //     console.log("b: " + b[i].what + " - " + b[i].when.format('YYYY/MM/DD'));
-    // }
     for (var it = 0; it < t.length; it++) {
         if (a[ia].when.isSame(dayjs(t[it].d))) {
             t[it].a = a[ia].what;
@@ -220,22 +163,21 @@ function fillTimeline() {
             }
         }
     }
-    for (var i = 0; i < t.length; i++) {
-        console.log("t: " + t[i].a + " - " + t[i].d.format('YYYY/MM/DD') + " - " + t[i].b);
-    }
+    // for (var i = 0; i < t.length; i++) {
+    //     console.log("t: " + t[i].a + " - " + t[i].d.format('YYYY/MM/DD') + " - " + t[i].b);
+    // }
 }
 
 function fillHTML() {
-    var header = document.getElementById("header");
-    var records = document.getElementById("records");
     var goals = document.getElementById("goals");
     var progress = document.getElementById("progress");
+    var records = document.getElementById("records");
 
-    goals.innerHTML = "<div class='goal header'><div class='left'>" + userA + "'s goals</div><div class='date'></div><div class='right'>Your goals&nbsp;&nbsp;<a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div>";
+    ag = returnEmptyStringIfUndefined(ag);
+    bg = returnEmptyStringIfUndefined(bg);
+    goals.innerHTML = "<div class='goal header'><div class='left'>" + userA + "'s goals</div><div class='date'></div><div class='right'>Your goals&nbsp;&nbsp;<a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div><div class='goal'><div class='left'>" + ag + "</div><div class='date'></div><div class='right'>" + bg + "</div></div>";
     progress.innerHTML = "<div class='record header'><div class='left'>" + userA + "'s progress</div><div class='date'></div><div class='right'>Your progress&nbsp;&nbsp;<sup><a href='https://airtable.com/" + form + "' target='_blank'>Add</a></sup></div></div></div>";
 
-    //header with usernames
-    // header.innerHTML = header.innerHTML + "<div class='record header'><div class='left'>" + userA + "</div><div class='date'></div><div class='right'>Your progress</div></div><div class='record'><div class='left'></div><div class='date'><a href='https://airtable.com/" + form + "' target='_blank'>add</a></div><div class='right'></div></div></div>";
     for (var i = t.length - 1; i >= 0; i--) {
         var d;
         if (i == t.length - 1) {
@@ -245,49 +187,35 @@ function fillHTML() {
         } else {
             d = t[i].d.format('YYYY/MM/DD');
         }
-        //check if undefined and substitute it with an empty string
-        if (t[i].a == undefined) {
-            t[i].a = "";
-        }
         if (t[i].b == undefined) {
-            t[i].b = "";
             d = "<div class='date'>" + d + "</div>";
         } else {
             d = "<div class='date' style='text-decoration: line-through;'>" + d + "</div>";
         }
+        t[i].a = returnEmptyStringIfUndefined(t[i].a);
+        t[i].b = returnEmptyStringIfUndefined(t[i].b);
         records.innerHTML = records.innerHTML + "<div class='record'><div class='left'>" + t[i].a + "</div>" + d + "<div class='right'>" + t[i].b + "</div></div>";
     }
-    //footer
-    // header.innerHTML = "<div class='goal header'><div class='left'></div><div class='date'></div><div class='right'>Your goals <a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div>" + header.innerHTML;
-    // for (var i = 0; i < g.length; i++) {
-    //     goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[i].a + "</div><div class='date'></div><div class='right'>" + g[i].b + "</div></div>";
-    // }
-    goals.innerHTML = goals.innerHTML + "<div class='goal'><div class='left'>" + g[0].a + "</div><div class='date'></div><div class='right'>" + g[0].b + "</div></div>";
-}
 
-function addLinkForm() {
-    var add = document.getElementById("add");
-    add.innerHTML = "<div class='record'><div class='left'></div><div class='date'></div><div class='right'><a href='https://airtable.com/" + form + "' target='_blank'>What progress have you made today?</a></div></div>";
 }
 
 function render() {
-    if (loadA == true && loadB == true && loadAgoals == true && loadBgoals == true) {
-        sortByDate();
-        getInitialDate();
-        createTimeline();
-        createGoalsList();
+    if (loadA == true && loadB == true && loadAG == true && loadBG == true) {
+        sortArrayOfObjectsByDate(a, "when");
+        sortArrayOfObjectsByDate(b, "when");
+        initialDate = getInitialDate(a[0].when, b[0].when);
+        t = populateTimelineArrayWithAnObjectForEachDate(initialDate);
         mergeMultipleEntriesForTheSameDate();
-        fillTimeline();
+        fillTimelineWithProgress();
         fillHTML();
-        // addLinkForm();
-        // setTimeout(function () {
-        //     document.getElementById('last').scrollIntoView({ behavior: "smooth" });
-        // }, 500);
         console.log("rendered!");
     }
 }
 
-
-/*
-- no tratar goals como lista
-*/
+function returnEmptyStringIfUndefined(x) {
+    if (x == undefined) {
+        return x = "";
+    } else {
+        return x;
+    }
+}
