@@ -7,6 +7,7 @@ body {
 }
 
 .logo {
+    font-size: 0.9rem;
     font-weight: 700;
     color: black;
 }
@@ -83,6 +84,9 @@ body {
     /* font-family: 'IBM Plex Mono', monospace;
     font-size: 0.7rem; */
     text-align: center;
+    font-size: 0.8em;
+    top: 2px;
+    position: relative;
 }
 
 #footer {

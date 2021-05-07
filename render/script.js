@@ -212,8 +212,8 @@ function fillHTML() {
     var records = document.getElementById("records");
 
     // var dotA, dotB;
-    var edit = "<a href='https://airtable.com/" + formG + "' target='_blank'><span class='small'>Edit</span></a>";
-    var add = "&nbsp;<br><a href='https://airtable.com/" + form + "' target='_blank'><span class='small'>Add</span></a><br>&nbsp;";
+    var edit = "<a href='https://airtable.com/" + formG + "' target='_blank'>Edit</a>";
+    var add = "&nbsp;<br><a href='https://airtable.com/" + form + "' target='_blank'>Add</a><br>&nbsp;";
 
     ag = returnEmptyStringIfUndefined(ag);
     bg = returnEmptyStringIfUndefined(bg);
