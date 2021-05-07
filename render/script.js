@@ -217,7 +217,7 @@ function fillHTML() {
 
     ag = returnEmptyStringIfUndefined(ag);
     bg = returnEmptyStringIfUndefined(bg);
-    goals.innerHTML = goals.innerHTML + "<div class='day'><div class='left'></div><div class='date'><span class='logo'>Track</span></div><div class='right'></div></div>";
+    // goals.innerHTML = goals.innerHTML + "<div class='day'><div class='left'></div><div class='date'><span class='logo'>Track</span></div><div class='right'></div></div>";
     goals.innerHTML = goals.innerHTML + "<div class='day header'><div class='left'><div class='record'><div>" + userA + "</div><div class='dot transparent'>&#9679;</div></div></div><div class='date'></div><div class='right'><div class='record'><div class='dot transparent'>&#9679;</div><div>" + userB + "</div></div></div></div><div class='day'><div class='left'><div class='record'><div>" + ag + "</div><div class='dot transparent'>&#9679;</div></div></div><div class='date'>" + edit + "</div><div class='right'><div class='record'><div class='dot transparent'>&#9679;</div><div>" + bg + "</div></div></div></div>";
     // progress.innerHTML = "<div class='day header'><div class='left'></div><div class='date'></div><div class='right'>" + add + "</div></div></div>";
 
