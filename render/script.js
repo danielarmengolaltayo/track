@@ -123,6 +123,8 @@ function populateTimelineArrayWithAnObjectForEachDate(startDate) {
     // console.log("days: " + days);
     for (var i = 0; i < days; i++) {
         x.push({
+            a: [],
+            b: [],
             d: startDate.add(i, 'day')
         });
     }
@@ -150,33 +152,76 @@ function fillTimelineWithProgress() {
     var ia = 0;
     var ib = 0;
     for (var it = 0; it < t.length; it++) {
-        if (a[ia].when.isSame(dayjs(t[it].d))) {
-            t[it].a = a[ia].what;
+        var iaa = 0;
+        while (a[ia].when.isSame(dayjs(t[it].d))) {
+            t[it].a[iaa] = a[ia].what;
+            iaa++;
             if (ia < a.length - 1) {
                 ia++;
+            } else {
+                break;
             }
         }
-        if (b[ib].when.isSame(dayjs(t[it].d))) {
-            t[it].b = b[ib].what;
+        var ibb = 0;
+        while (b[ib].when.isSame(dayjs(t[it].d))) {
+            t[it].b[ibb] = b[ib].what;
+            ibb++;
             if (ib < b.length - 1) {
                 ib++;
+            } else {
+                break;
             }
         }
     }
-    // for (var i = 0; i < t.length; i++) {
-    //     console.log("t: " + t[i].a + " - " + t[i].d.format('YYYY/MM/DD') + " - " + t[i].b);
-    // }
+    for (var i = 0; i < t.length; i++) {
+        console.log(t[i].d.format('YYYY/MM/DD'));
+        for (var j = 0; j < t[i].a.length; j++) {
+            console.log("a: " + t[i].a[j]);
+        }
+        for (var j = 0; j < t[i].b.length; j++) {
+            console.log("b: " + t[i].b[j]);
+        }
+    }
 }
+
+// function fillTimelineWithProgress() {
+//     var ia = 0;
+//     var ib = 0;
+//     for (var it = 0; it < t.length; it++) {
+//         if (a[ia].when.isSame(dayjs(t[it].d))) {
+//             t[it].a = a[ia].what;
+//             if (ia < a.length - 1) {
+//                 ia++;
+//             }
+//         }
+//         if (b[ib].when.isSame(dayjs(t[it].d))) {
+//             t[it].b = b[ib].what;
+//             if (ib < b.length - 1) {
+//                 ib++;
+//             }
+//         }
+//     }
+//     // for (var i = 0; i < t.length; i++) {
+//     //     console.log("t: " + t[i].a + " - " + t[i].d.format('YYYY/MM/DD') + " - " + t[i].b);
+//     // }
+// }
 
 function fillHTML() {
     var goals = document.getElementById("goals");
     var progress = document.getElementById("progress");
     var records = document.getElementById("records");
 
+    // var dotA, dotB;
+    var edit = "<a href='https://airtable.com/" + formG + "' target='_blank'><span class='small'>Edit</span></a>";
+    var add = "&nbsp;<br><a href='https://airtable.com/" + form + "' target='_blank'><span class='small'>Add</span></a><br>&nbsp;";
+
     ag = returnEmptyStringIfUndefined(ag);
     bg = returnEmptyStringIfUndefined(bg);
-    goals.innerHTML = "<div class='goal header'><div class='left'>" + userA + "'s goals</div><div class='date'></div><div class='right'>Your goals&nbsp;&nbsp;<a href='https://airtable.com/" + formG + "' target='_blank'><sup>Edit</sup></a></div></div><div class='goal'><div class='left'>" + ag + "</div><div class='date'></div><div class='right'>" + bg + "</div></div>";
-    progress.innerHTML = "<div class='record header'><div class='left'>" + userA + "'s progress</div><div class='date'></div><div class='right'>Your progress&nbsp;&nbsp;<sup><a href='https://airtable.com/" + form + "' target='_blank'>Add</a></sup></div></div></div>";
+    goals.innerHTML = goals.innerHTML + "<div class='day'><div class='left'></div><div class='date'><span class='logo'>Track</span></div><div class='right'></div></div>";
+    goals.innerHTML = goals.innerHTML + "<div class='day header'><div class='left'><div class='record'><div>" + userA + "</div><div class='dot transparent'>&#9679;</div></div></div><div class='date'></div><div class='right'><div class='record'><div class='dot transparent'>&#9679;</div><div>" + userB + "</div></div></div></div><div class='day'><div class='left'><div class='record'><div>" + ag + "</div><div class='dot transparent'>&#9679;</div></div></div><div class='date'>" + edit + "</div><div class='right'><div class='record'><div class='dot transparent'>&#9679;</div><div>" + bg + "</div></div></div></div>";
+    // progress.innerHTML = "<div class='day header'><div class='left'></div><div class='date'></div><div class='right'>" + add + "</div></div></div>";
+
+    records.innerHTML = records.innerHTML + "<div class='day'><div class='left'></div><div class='date'>" + add + "</div><div class='right'></div></div>";
 
     for (var i = t.length - 1; i >= 0; i--) {
         var d;
@@ -187,14 +232,40 @@ function fillHTML() {
         } else {
             d = t[i].d.format('YYYY/MM/DD');
         }
-        if (t[i].b == undefined) {
-            d = "<div class='date'>" + d + "</div>";
-        } else {
-            d = "<div class='date' style='text-decoration: line-through;'>" + d + "</div>";
+        // if (t[i].b == undefined) {
+        //     d = "<div class='date'>" + d + "</div>";
+        // } else {
+        //     d = "<div class='date' style='text-decoration: line-through;'>" + d + "</div>";
+        // }
+        d = "<div class='date'>" + d + "</div>";
+        // if (t[i].a == undefined || t[i].b == undefined) {
+        //     if (t[i].a == undefined) {
+        //         dotA = "";
+        //     } else if (t[i].b == undefined) {
+        //         dotB = "";
+        //     }
+        // } else {
+        //     dotA = "<div class='dot'>&#9679;</div>";
+        //     dotB = dotA;
+        // }
+        var dot = "<div class='dot'>&#9679;</div>";
+        var left = "<div class='left'>";
+        for (var j = 0; j < t[i].a.length; j++) {
+            if (t[i].a[j] != undefined) {
+                left = left + "<div class='record'><div>" + t[i].a[j] + "</div>" + dot + "</div>";
+            }
         }
-        t[i].a = returnEmptyStringIfUndefined(t[i].a);
-        t[i].b = returnEmptyStringIfUndefined(t[i].b);
-        records.innerHTML = records.innerHTML + "<div class='record'><div class='left'>" + t[i].a + "</div>" + d + "<div class='right'>" + t[i].b + "</div></div>";
+        left = left + "</div>";
+        var right = "<div class='right'>";
+        for (var j = 0; j < t[i].b.length; j++) {
+            if (t[i].b[j] != undefined) {
+                right = right + "<div class='record'>" + dot + "<div>" + t[i].b[j] + "</div></div>";
+            }
+        }
+        right = right + "</div>";
+        // t[i].b = returnEmptyStringIfUndefined(t[i].b);
+
+        records.innerHTML = records.innerHTML + "<div class='day'>" + left + d + right + "</div>";
     }
 
 }
@@ -205,7 +276,7 @@ function render() {
         sortArrayOfObjectsByDate(b, "when");
         initialDate = getInitialDate(a[0].when, b[0].when);
         t = populateTimelineArrayWithAnObjectForEachDate(initialDate);
-        mergeMultipleEntriesForTheSameDate();
+        // mergeMultipleEntriesForTheSameDate();
         fillTimelineWithProgress();
         fillHTML();
         console.log("rendered!");
