@@ -25,7 +25,11 @@ body {
 }
 
 #last {
-    padding: 20px 0 50vh 0;
+    padding: 25vh 0 25vh 0;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    position: relative;
 }
 
 .left,
