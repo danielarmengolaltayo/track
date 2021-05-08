@@ -306,9 +306,9 @@ function setupListeners() {
             var e = recordEls[j].getElementsByClassName("recordContent")[0];
             if (e != undefined) {
                 e.addEventListener('click', function () {
-                    if (confirm("Are you sure to delete this record?")) {
+                    if (confirm("Are you sure to delete this record? This action is irreversible.")) {
                         deleteRecord(this.id);
-                        alert("Record deleted!");
+                        alert("Record deleted! Have a nice day :)");
                         window.location.reload();
                     }
                 });
