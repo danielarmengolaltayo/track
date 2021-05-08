@@ -39,7 +39,7 @@ body {
 
 .left {
     text-align: right;
-    color: #bbb;
+    /* color: #bbb; */
 }
 
 .day,
@@ -120,6 +120,17 @@ a:visited {
     padding-right: 10px;
     color: red;
 }
+
+.recordContent:hover {
+    text-decoration: line-through;
+    cursor: pointer;
+    color: red;
+}
+
+.left .record {
+    color: #bbb;
+}
+
 
 @media only screen and (min-width: 1000px) {
     #wrapper {

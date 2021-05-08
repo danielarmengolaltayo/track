@@ -42,8 +42,9 @@ base(airtableBaseNameA).select({
 }).eachPage(function page(records) {
     records.forEach(function (record) {
         a.push({
-            what: record.get("what"),
-            when: dayjs(record.get("when"))
+            what: record.get("what").trim(),
+            when: dayjs(record.get("when")),
+            id: record.id
         });
     });
     loadA = true;
@@ -58,8 +59,9 @@ base(airtableBaseNameB).select({
 }).eachPage(function page(records) {
     records.forEach(function (record) {
         b.push({
-            what: record.get("what"),
-            when: dayjs(record.get("when"))
+            what: record.get("what").trim(),
+            when: dayjs(record.get("when")),
+            id: record.id
         });
     });
     loadB = true;
@@ -73,7 +75,7 @@ base(airtableBaseNameAgoals).select({
     view: airtableViewName
 }).eachPage(function page(records) {
     records.slice(0, 1).forEach(function (record) {
-        ag = record.get("goals");
+        ag = record.get("goals").trim();
     });
     loadAG = true;
     render();
@@ -94,6 +96,14 @@ base(airtableBaseNameBgoals).select({
 }, function done(err) {
     if (err) { console.error(err); return; }
 });
+
+// you need editor access to the base in order to delete
+function deleteRecord(id) {
+    base(airtableBaseNameB).destroy([id], function (err, deletedRecords) {
+        if (err) { console.error(err); return; }
+        console.log('Deleted', deletedRecords.length, 'records');
+    });
+}
 
 /////////////////// variables
 
@@ -124,29 +134,31 @@ function populateTimelineArrayWithAnObjectForEachDate(startDate) {
     for (var i = 0; i < days; i++) {
         x.push({
             a: [],
+            aId: [],
             b: [],
+            bId: [],
             d: startDate.add(i, 'day')
         });
     }
     return x;
 }
 
-function mergeMultipleEntriesForTheSameDate() {
-    for (var i = 1; i < a.length; i++) {
-        if (a[i].when.isSame(a[i - 1].when)) {
-            a[i - 1].what = a[i].what + "<br>" + a[i - 1].what;
-            a.splice(i, 1);
-            i--;
-        }
-    }
-    for (var i = 1; i < b.length; i++) {
-        if (b[i].when.isSame(b[i - 1].when)) {
-            b[i - 1].what = b[i].what + "<br>" + b[i - 1].what;
-            b.splice(i, 1);
-            i--;
-        }
-    }
-}
+// function mergeMultipleEntriesForTheSameDate() {
+//     for (var i = 1; i < a.length; i++) {
+//         if (a[i].when.isSame(a[i - 1].when)) {
+//             a[i - 1].what = a[i].what + "<br>" + a[i - 1].what;
+//             a.splice(i, 1);
+//             i--;
+//         }
+//     }
+//     for (var i = 1; i < b.length; i++) {
+//         if (b[i].when.isSame(b[i - 1].when)) {
+//             b[i - 1].what = b[i].what + "<br>" + b[i - 1].what;
+//             b.splice(i, 1);
+//             i--;
+//         }
+//     }
+// }
 
 function fillTimelineWithProgress() {
     var ia = 0;
@@ -155,6 +167,7 @@ function fillTimelineWithProgress() {
         var iaa = 0;
         while (a[ia].when.isSame(dayjs(t[it].d))) {
             t[it].a[iaa] = a[ia].what;
+            t[it].aId[iaa] = a[ia].id;
             iaa++;
             if (ia < a.length - 1) {
                 ia++;
@@ -165,6 +178,7 @@ function fillTimelineWithProgress() {
         var ibb = 0;
         while (b[ib].when.isSame(dayjs(t[it].d))) {
             t[it].b[ibb] = b[ib].what;
+            t[it].bId[ibb] = b[ib].id;
             ibb++;
             if (ib < b.length - 1) {
                 ib++;
@@ -252,14 +266,14 @@ function fillHTML() {
         var left = "<div class='left'>";
         for (var j = 0; j < t[i].a.length; j++) {
             if (t[i].a[j] != undefined) {
-                left = left + "<div class='record'><div>" + t[i].a[j] + "</div>" + dot + "</div>";
+                left = left + "<div class='record'><div id='" + t[i].aId[j] + "'>" + t[i].a[j] + "</div>" + dot + "</div>";
             }
         }
         left = left + "</div>";
         var right = "<div class='right'>";
         for (var j = 0; j < t[i].b.length; j++) {
             if (t[i].b[j] != undefined) {
-                right = right + "<div class='record'>" + dot + "<div>" + t[i].b[j] + "</div></div>";
+                right = right + "<div class='record'>" + dot + "<div class='recordContent' id='" + t[i].bId[j] + "'>" + t[i].b[j] + "</div></div>";
             }
         }
         right = right + "</div>";
@@ -279,7 +293,27 @@ function render() {
         // mergeMultipleEntriesForTheSameDate();
         fillTimelineWithProgress();
         fillHTML();
+        setupListeners();
         console.log("rendered!");
+    }
+}
+
+function setupListeners() {
+    var rightEls = document.getElementsByClassName("right");
+    for (var i = 0; i < rightEls.length; i++) {
+        var recordEls = rightEls[i].getElementsByClassName("record");
+        for (var j = 0; j < recordEls.length; j++) {
+            var e = recordEls[j].getElementsByClassName("recordContent")[0];
+            if (e != undefined) {
+                e.addEventListener('click', function () {
+                    if (confirm("Are you sure to delete this record?")) {
+                        deleteRecord(this.id);
+                        alert("Record deleted!");
+                        window.location.reload();
+                    }
+                });
+            }
+        }
     }
 }
 
